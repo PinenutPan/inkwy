@@ -1,0 +1,40 @@
+server:
+  port: 80
+spring:
+  cloud:
+    # nacos注册中心
+    nacos:
+      server-addr: 127.0.0.1:8848
+      username: nacos
+      password: nacos
+      discovery:
+        enabled: true
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+         - id: test
+           predicates:
+             - Path=/test
+           uri: http://localhost:8767/test
+         #
+         - id: databasew-web
+           predicates:
+             - Path=/database-web/**
+           uri: lb://database
+           filters:
+             - StripPrefix=1
+         - id: spa
+           predicates:
+             - Path=/
+           uri: http://localhost:9999
+  boot:
+    admin:
+      client:
+        # 设置 Spring Boot Admin Server 地址
+        url: http://localhost:9999
+        instance:
+          prefer-ip: true # 注册实例时，优先使用 IP
+

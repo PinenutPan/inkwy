@@ -1,0 +1,8 @@
+version: '3.1'
+services:
+  gateway:
+    restart: always
+    image: 192.168.88.151:5000/database
+    container_name: database
+    ports:
+      - 80:80
