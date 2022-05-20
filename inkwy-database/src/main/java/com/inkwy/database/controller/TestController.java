@@ -7,12 +7,10 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import sun.misc.BASE64Encoder;
 
 import java.io.*;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.net.*;
 import java.util.Base64;
 import java.util.Enumeration;
 
@@ -38,6 +36,37 @@ public class TestController {
     @ApiOperation("接口测试")
     public Response init(){
         return Response.respSuccess("success");
+    }
+
+    @GetMapping("/netSourceToBase64")
+    @ApiOperation("netSourceToBase64")
+    public String netSourceToBase64(@RequestParam String srcUrl) {
+        ByteArrayOutputStream outPut = new ByteArrayOutputStream();
+        byte[] data = new byte[1024 * 8];
+        try {
+            // 创建URL
+            URL url = new URL(srcUrl);
+            // 创建链接
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setConnectTimeout(10 * 1000);
+
+            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                //连接失败/链接失效/文件不存在
+                return null;
+            }
+            InputStream inStream = conn.getInputStream();
+            int len = -1;
+            while (-1 != (len = inStream.read(data))) {
+                outPut.write(data, 0, len);
+            }
+            inStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // 对字节数组Base64编码
+        BASE64Encoder encoder = new BASE64Encoder();
+        return encoder.encode(outPut.toByteArray()).replace("\r","").replace("\n","");
     }
 
     @PostMapping("/pdfToBase64")
